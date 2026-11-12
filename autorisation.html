@@ -1,14 +1,38 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Autorisation Twitch - OMBRE_LIVE</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autorisation Twitch - OMBRE_LIVE</title>
 </head>
 <body>
-  <h2>Autorisation Twitch</h2>
-  <p>Cette page prépare la connexion Twitch.</p>
-  <p>Ne partage jamais ton code d'autorisation.</p>
+<h2>🏆 OMBRE_LIVE - Autorisation Twitch</h2>
+<p>Cette page sert à préparer l'accès aux followers.</p>
+
+<label for="client">Identifiant client Twitch :</label>
+<input id="client" placeholder="Client ID">
+<button onclick="connecter()">Autoriser avec Twitch</button>
+
+<script>
+function connecter() {
+  const clientId = document.getElementById("client").value.trim();
+  if (!clientId) {
+    alert("Entre ton Client ID Twitch.");
+    return;
+  }
+
+  const redirect = "https://ombrelive02.github.io/mur-des-followers/";
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirect,
+    response_type: "code",
+    scope: "moderator:read:followers",
+    state: crypto.randomUUID()
+  });
+
+  window.location.href =
+    "https://id.twitch.tv/oauth2/authorize?" + params.toString();
+}
+</script>
 </body>
 </html>
