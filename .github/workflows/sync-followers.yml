@@ -3,11 +3,38 @@ name: Synchronisation followers Twitch
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Vérifier la configuration
-        run: echo "Workflow prêt pour la synchronisation Twitch"
-        
+      - name: Recuperer le site
+        uses: actions/checkout@v4
+
+      - name: Preparer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Recuperer les followers
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          TWITCH_BROADCASTER_ID: ${{ secrets.TWITCH_BROADCASTER_ID }}
+        run: python sync_followers.py
+
+      - name: Enregistrer les changements
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add followers.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Actualiser les followers"
+            git push
+          fi
+          
