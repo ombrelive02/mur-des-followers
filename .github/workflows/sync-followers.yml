@@ -1,0 +1,13 @@
+
+name: Synchronisation followers Twitch
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier la configuration
+        run: echo "Workflow prêt pour la synchronisation Twitch"
+        
