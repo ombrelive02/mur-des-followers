@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OMBRE_LIVE - Mur des Followers</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #090909;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    header {
+      padding: 45px 15px;
+      background: linear-gradient(135deg, #130000, #7b0000, #160000);
+      border-bottom: 3px solid #ff3030;
+    }
+    h1 {
+      color: #ff3333;
+      font-size: clamp(28px, 6vw, 50px);
+      margin: 15px 0;
+    }
+    .subtitle { color: #ffc7c7; }
+    .count {
+      font-size: 24px;
+      margin: 30px 0;
+      color: #ff5555;
+    }
+    .wall {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      padding: 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+    .follower {
+      background: #1c1010;
+      border: 1px solid #9b2525;
+      border-radius: 12px;
+      padding: 18px 8px;
+      overflow-wrap: anywhere;
+    }
+    footer {
+      padding: 35px 15px;
+      color: #aaa;
+    }
+    a { color: #ff5555; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🏆 LE MUR DES FOLLOWERS 🏆</h1>
+    <h2>😈 OMBRE_LIVE 😈</h2>
+    <p class="subtitle">❤️ MERCI POUR VOTRE SOUTIEN ! ❤️</p>
+  </header>
+
+  <div class="count" id="count"></div>
+  <main class="wall" id="wall"></main>
+
+  <footer>
+    💜 Chaque follower fait partie de l'aventure !
+    <p>
+      <a href="https://www.twitch.tv/ombrelive02">
+        Retrouve-moi sur Twitch
+      </a>
+    </p>
+  </footer>
+
+  <script>
+    // Liste provisoire : la synchronisation Twitch
+    // sera configurée dans une étape séparée.
+    const followers = [
+      "enzo1078126",
+      "m8_amir93101",
+      "mohadz21345",
+      "bobstevegd",
+      "marwandu_",
+      "jah_userz3",
+      "anaconda198",
+      "dark1_alpha02",
+      "pimment69",
+      "axel_290611",
+      "matheo3212",
+      "mathias_mitori_and_shiro",
+      "Zenoozn",
+      "liam_pk_ytb",
+      "lollipop_bonbonfrance",
+      "felux_12345",
+      "evaneyey",
+      "carlangas_5502",
+      "clnprimetwitch",
+      "isaacvm_10",
+      "galax_levrai",
+      "yume_squle",
+      "skylarkaake30",
+      "rosephoenix17",
+      "poppysmoky90",
+      "leox_io",
+      "gaetanmagnier1312"
+    ];
+
+    document.getElementById("count").textContent =
+      "❤️ " + followers.length + " followers affichés";
+
+    const wall = document.getElementById("wall");
+    followers.forEach(name => {
+      const card = document.createElement("div");
+      card.className = "follower";
+      card.textContent = "❤️ " + name;
+      wall.appendChild(card);
+    });
+  </script>
+</body>
+</html>
