@@ -1,0 +1,25 @@
+
+name: Recuperer autorisation Twitch
+
+on:
+  workflow_dispatch:
+
+jobs:
+  autorisation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Recuperer les fichiers
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Echanger le code Twitch
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          TWITCH_AUTH_CODE: ${{ secrets.TWITCH_AUTH_CODE }}
+        run: python recuperer_token.py
+        
