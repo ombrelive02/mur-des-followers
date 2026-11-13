@@ -1,14 +1,18 @@
 
-name: Recuperer autorisation Twitch
+name: Recuperer jetons Twitch
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  autorisation:
+  recuperer:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Recuperer les fichiers
+      - name: Recuperer le depot
         uses: actions/checkout@v4
 
       - name: Installer Python
@@ -16,10 +20,22 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Echanger le code Twitch
+      - name: Installer le chiffrement
+        run: pip install cryptography
+
+      - name: Recuperer et chiffrer les jetons
         env:
           TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
           TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
           TWITCH_AUTH_CODE: ${{ secrets.TWITCH_AUTH_CODE }}
+          TWITCH_TOKEN_KEY: ${{ secrets.TWITCH_TOKEN_KEY }}
         run: python recuperer_token.py
-        
+
+      - name: Sauvegarder les jetons chiffres
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add twitch_tokens.enc
+          git commit -m "Sauvegarde jetons Twitch chiffres"
+          git push
+          
