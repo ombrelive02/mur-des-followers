@@ -72,50 +72,39 @@
   </footer>
 
   <script>
-    // Liste provisoire : la synchronisation Twitch
-    // sera configurée dans une étape séparée.
-    const followers = [
-      "enzo1078126",
-      "m8_amir93101",
-      "mohadz21345",
-      "bobstevegd",
-      "marwandu_",
-      "jah_userz3",
-      "anaconda198",
-      "dark1_alpha02",
-      "pimment69",
-      "axel_290611",
-      "matheo3212",
-      "mathias_mitori_and_shiro",
-      "Zenoozn",
-      "liam_pk_ytb",
-      "lollipop_bonbonfrance",
-      "felux_12345",
-      "evaneyey",
-      "carlangas_5502",
-      "clnprimetwitch",
-      "isaacvm_10",
-      "galax_levrai",
-      "yume_squle",
-      "skylarkaake30",
-      "rosephoenix17",
-      "poppysmoky90",
-      "leox_io",
-      "gaetanmagnier1312",
-      "mondeginoyt",
-      "nemoledino"
-    ];
+    async function afficherFollowers() {
+      const compteur = document.getElementById("count");
+      const mur = document.getElementById("wall");
 
-    document.getElementById("count").textContent =
-      "❤️ " + followers.length + " followers affichés";
+      try {
+        const reponse = await fetch("followers.json?version=" + Date.now(), {
+          cache: "no-store"
+        });
+        if (!reponse.ok) {
+          throw new Error("Impossible de charger followers.json");
+        }
 
-    const wall = document.getElementById("wall");
-    followers.forEach(name => {
-      const card = document.createElement("div");
-      card.className = "follower";
-      card.textContent = "❤️ " + name;
-      wall.appendChild(card);
-    });
+        const abonnes = await reponse.json();
+        if (!Array.isArray(abonnes)) {
+          throw new Error("Format des followers invalide");
+        }
+
+        compteur.textContent = "❤️ " + abonnes.length + " followers affichés";
+        mur.replaceChildren();
+
+        abonnes.forEach(nom => {
+          const carte = document.createElement("div");
+          carte.className = "follower";
+          carte.textContent = "❤️ " + nom;
+          mur.appendChild(carte);
+        });
+      } catch (erreur) {
+        compteur.textContent = "⚠️ Impossible de charger les followers";
+        console.error("Chargement des followers :", erreur);
+      }
+    }
+
+    afficherFollowers();
   </script>
 </body>
 </html>
