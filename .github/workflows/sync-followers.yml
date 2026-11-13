@@ -12,29 +12,31 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Recuperer le site
+      - name: Recuperer les fichiers
         uses: actions/checkout@v4
 
-      - name: Preparer Python
+      - name: Installer Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Recuperer les followers
+      - name: Synchroniser les followers
         env:
           TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
-          TWITCH_USER_ACCESS_TOKEN: ${{ secrets.TWITCH_USER_ACCESS_TOKEN }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
           TWITCH_BROADCASTER_ID: ${{ secrets.TWITCH_BROADCASTER_ID }}
+          TWITCH_REFRESH_TOKEN: ${{ secrets.TWITCH_REFRESH_TOKEN }}
         run: python sync_followers.py
 
-      - name: Enregistrer les changements
+      - name: Enregistrer les followers
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add followers.json
           if ! git diff --cached --quiet; then
-            git commit -m "Actualiser les followers"
+            git commit -m "Mise a jour automatique des followers"
             git push
           fi
           
