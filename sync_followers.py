@@ -1,43 +1,46 @@
 
 import os
 import json
+import base64
+import hashlib
 import urllib.parse
 import urllib.request
+from cryptography.fernet import Fernet
 
 client_id = os.environ["TWITCH_CLIENT_ID"]
 client_secret = os.environ["TWITCH_CLIENT_SECRET"]
 broadcaster_id = os.environ["TWITCH_BROADCASTER_ID"]
-refresh_token = os.environ["TWITCH_REFRESH_TOKEN"]
+cle = os.environ["TWITCH_TOKEN_KEY"]
 
-def requete(url, donnees=None, headers=None):
-    req = urllib.request.Request(
-        url,
-        data=donnees,
-        headers=headers or {}
-    )
-    with urllib.request.urlopen(req, timeout=30) as rep:
-        return json.load(rep)
+cle_derivee = base64.urlsafe_b64encode(
+    hashlib.sha256(cle.encode("utf-8")).digest()
+)
+chiffrement = Fernet(cle_derivee)
 
-# Renouveler le jeton Twitch
+with open("twitch_tokens.enc", "rb") as fichier:
+    tokens = json.loads(chiffrement.decrypt(fichier.read()))
+
 donnees = urllib.parse.urlencode({
     "client_id": client_id,
     "client_secret": client_secret,
     "grant_type": "refresh_token",
-    "refresh_token": refresh_token
-}).encode()
+    "refresh_token": tokens["refresh_token"]
+}).encode("utf-8")
 
-tokens = requete(
+requete = urllib.request.Request(
     "https://id.twitch.tv/oauth2/token",
-    donnees,
-    {"Content-Type": "application/x-www-form-urlencoded"}
+    data=donnees,
+    method="POST"
 )
 
-access_token = tokens["access_token"]
+with urllib.request.urlopen(requete, timeout=30) as reponse:
+    nouveaux_tokens = json.load(reponse)
 
-headers = {
-    "Client-ID": client_id,
-    "Authorization": "Bearer " + access_token
-}
+with open("twitch_tokens.enc", "wb") as fichier:
+    fichier.write(chiffrement.encrypt(json.dumps({
+        "access_token": nouveaux_tokens["access_token"],
+        "refresh_token": nouveaux_tokens["refresh_token"]
+    }).encode("utf-8")))
 
 followers = []
 cursor = None
@@ -47,7 +50,6 @@ while True:
         "broadcaster_id": broadcaster_id,
         "first": 100
     }
-
     if cursor:
         params["after"] = cursor
 
@@ -56,7 +58,16 @@ while True:
         + urllib.parse.urlencode(params)
     )
 
-    resultat = requete(url, headers=headers)
+    requete = urllib.request.Request(
+        url,
+        headers={
+            "Client-ID": client_id,
+            "Authorization": "Bearer " + nouveaux_tokens["access_token"]
+        }
+    )
+
+    with urllib.request.urlopen(requete, timeout=30) as reponse:
+        resultat = json.load(reponse)
 
     followers.extend(
         utilisateur["user_name"]
@@ -64,11 +75,10 @@ while True:
     )
 
     cursor = resultat.get("pagination", {}).get("cursor")
-
     if not cursor:
         break
 
 with open("followers.json", "w", encoding="utf-8") as fichier:
     json.dump(followers, fichier, ensure_ascii=False, indent=2)
 
-print(f"{len(followers)} followers enregistrés")
+print(f"{len(followers)} followers enregistres")
