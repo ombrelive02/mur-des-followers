@@ -5,8 +5,39 @@ import urllib.parse
 import urllib.request
 
 client_id = os.environ["TWITCH_CLIENT_ID"]
+client_secret = os.environ["TWITCH_CLIENT_SECRET"]
 broadcaster_id = os.environ["TWITCH_BROADCASTER_ID"]
-access_token = os.environ["TWITCH_USER_ACCESS_TOKEN"]
+refresh_token = os.environ["TWITCH_REFRESH_TOKEN"]
+
+def requete(url, donnees=None, headers=None):
+    req = urllib.request.Request(
+        url,
+        data=donnees,
+        headers=headers or {}
+    )
+    with urllib.request.urlopen(req, timeout=30) as rep:
+        return json.load(rep)
+
+# Renouveler le jeton Twitch
+donnees = urllib.parse.urlencode({
+    "client_id": client_id,
+    "client_secret": client_secret,
+    "grant_type": "refresh_token",
+    "refresh_token": refresh_token
+}).encode()
+
+tokens = requete(
+    "https://id.twitch.tv/oauth2/token",
+    donnees,
+    {"Content-Type": "application/x-www-form-urlencoded"}
+)
+
+access_token = tokens["access_token"]
+
+headers = {
+    "Client-ID": client_id,
+    "Authorization": "Bearer " + access_token
+}
 
 followers = []
 cursor = None
@@ -25,27 +56,19 @@ while True:
         + urllib.parse.urlencode(params)
     )
 
-    request = urllib.request.Request(
-        url,
-        headers={
-            "Client-ID": client_id,
-            "Authorization": "Bearer " + access_token
-        }
-    )
-
-    with urllib.request.urlopen(request, timeout=30) as response:
-        result = json.load(response)
+    resultat = requete(url, headers=headers)
 
     followers.extend(
-        item["user_name"] for item in result["data"]
+        utilisateur["user_name"]
+        for utilisateur in resultat["data"]
     )
 
-    cursor = result.get("pagination", {}).get("cursor")
+    cursor = resultat.get("pagination", {}).get("cursor")
 
     if not cursor:
         break
 
-with open("followers.json", "w", encoding="utf-8") as file:
-    json.dump(followers, file, ensure_ascii=False, indent=2)
+with open("followers.json", "w", encoding="utf-8") as fichier:
+    json.dump(followers, fichier, ensure_ascii=False, indent=2)
 
 print(f"{len(followers)} followers enregistrés")
